@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AltokeGo | Sarmiento, San Juan</title>
+  
+  <!-- Estilos y FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-light">
+
+  <!-- Contenedor para notificaciones Toast -->
+  <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+  <!-- ================= VISTA 1: LOGIN ================= -->
+  <div id="authView" class="view-screen" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f4f6f8;">
+    <div class="auth-card" style="background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;">
+      
+      <h2 style="margin-bottom: 5px; color: #111b21;">AltokeGo Sarmiento</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Selecciona un perfil demo para ingresar:</p>
+
+      <!-- Botones de Acceso Rápido -->
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button type="button" id="quickLoginPassenger" style="flex: 1; padding: 12px 8px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; cursor: pointer; transition: all 0.2s;">
+          <i class="fa-solid fa-user" style="color: #00a884; font-size: 18px; margin-bottom: 4px;"></i><br>
+          <span style="font-size: 13px; font-weight: 600;">Pasajero</span>
+        </button>
+        <button type="button" id="quickLoginDriver" style="flex: 1; padding: 12px 8px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; cursor: pointer; transition: all 0.2s;">
+          <i class="fa-solid fa-taxi" style="color: #009ee3; font-size: 18px; margin-bottom: 4px;"></i><br>
+          <span style="font-size: 13px; font-weight: 600;">Conductor</span>
+        </button>
+        <button type="button" id="quickLoginAdmin" style="flex: 1; padding: 12px 8px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; cursor: pointer; transition: all 0.2s;">
+          <i class="fa-solid fa-shield-halved" style="color: #6c757d; font-size: 18px; margin-bottom: 4px;"></i><br>
+          <span style="font-size: 13px; font-weight: 600;">Admin</span>
+        </button>
+      </div>
+
+      <!-- Formulario Tradicional -->
+      <form id="authLoginForm">
+        <input type="text" id="authEmailInput" placeholder="pasajero@altokego.com.ar" value="pasajero@altokego.com.ar" style="width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;" required>
+        <button type="submit" id="authSubmitBtn" style="width: 100%; padding: 12px; background: #00a884; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+          Ingresar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= VISTA 2: PASAJERO ================= -->
+  <div id="passengerView" class="view-screen" style="display: none;">
+    <div style="display: flex; height: 100vh; flex-wrap: wrap;">
+      
+      <!-- Chat Panel -->
+      <div style="flex: 1; min-width: 320px; display: flex; flex-direction: column; border-right: 1px solid #ddd; height: 100vh;">
+        <header style="padding: 15px; background: #00a884; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 16px;">AltokeGo Sarmiento 🚀</h3>
+          <button id="passengerLogoutBtn" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 14px;">
+            <i class="fa-solid fa-right-from-bracket"></i> Salir
+          </button>
+        </header>
+
+        <div id="messagesBody" style="flex: 1; padding: 15px; overflow-y: auto; background: #efeae2;">
+          <div id="messagesContainer"></div>
+          <div id="typingBubble" style="display: none; color: #666; font-style: italic; font-size: 13px; margin-top: 5px;">AltokeGo está escribiendo...</div>
+        </div>
+
+        <div id="quickRepliesBar" style="padding: 10px; display: flex; gap: 8px; overflow-x: auto; background: #fff; border-top: 1px solid #ddd;"></div>
+
+        <footer style="padding: 10px; background: #f0f2f5; display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="messageInput" placeholder="Escribe tu destino..." style="flex: 1; padding: 10px 14px; border-radius: 20px; border: 1px solid #ccc; outline: none;">
+          <button id="sendMessageBtn" style="width: 40px; height: 40px; background: #00a884; color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </footer>
+      </div>
+
+      <!-- Mapa Panel -->
+      <div style="flex: 1; min-width: 320px; position: relative; height: 100vh;">
+        <div id="map" style="width: 100%; height: 100%;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= VISTA 3: CONDUCTOR ================= -->
+  <div id="driverView" class="view-screen" style="display: none; padding: 20px;">
+    <h2>Panel Conductor - Carlos Mendoza</h2>
+    <button id="driverLogoutBtn" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 20px;">Cerrar Sesión</button>
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
+      <h3 id="driverStepTitle">Esperando solicitudes...</h3>
+      <button id="driverStepActionBtn" style="padding: 10px 20px; background: #009ee3; color: white; border: none; border-radius: 4px; cursor: pointer;">Aceptar viaje</button>
+    </div>
+  </div>
+
+  <!-- ================= VISTA 4: ADMIN ================= -->
+  <div id="adminView" class="view-screen" style="display: none; padding: 20px;">
+    <h2>Panel de Administración - Sarmiento</h2>
+    <button id="adminLogoutBtn" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+  </div>
+
+  <!-- Carga de Scripts en Orden Correcto -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="auth.js"></script>
+  <script src="maps.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
